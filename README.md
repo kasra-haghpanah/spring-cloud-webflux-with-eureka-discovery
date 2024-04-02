@@ -40,7 +40,8 @@ http://localhost:8181/customer/resource/1.0.0/ws.html
 
 If you'd like to run multiple instances of your microservice, you should refer to the **customer-reactive-microservice** module. Then, as shown in the following picture, copy the files bordered by red rectangles to the directory of your choice.
 
-![01](https://github.com/kasra-haghpanah/spring-cloud-webflux-with-eureka-discovery/assets/53397941/8dcdf4fb-26d3-411c-b7e8-e0e31317487e)
+
+![01](https://github.com/kasra-haghpanah/spring-cloud-webflux-with-eureka-discovery/assets/53397941/3c21d5bc-5f5a-43b4-869a-2173edb1df3d)
 
 
 
@@ -53,13 +54,14 @@ If you'd like to run multiple instances of your microservice, you should refer t
 > [!NOTE]
 > Repeat as required to execute this command. If you'd like to launch more instances of your microservice, there is no need to copy again. Just execute the command but with another unique port.   
 
-![02](https://github.com/kasra-haghpanah/spring-cloud-webflux-with-eureka-discovery/assets/53397941/81e4b181-f67d-4c04-a33a-0a88c39350f0)
+![02](https://github.com/kasra-haghpanah/spring-cloud-webflux-with-eureka-discovery/assets/53397941/5e2e3512-0f4c-4ccb-8037-41e74d8ab845)
 
-![image](https://github.com/kasra-haghpanah/spring-cloud-webflux-with-eureka-discovery/assets/53397941/475c022e-28e9-43ca-9a06-726aed33e896)
+![03](https://github.com/kasra-haghpanah/spring-cloud-webflux-with-eureka-discovery/assets/53397941/1314c04c-55b1-4974-898f-dd2b59930ad2)
 
-![image](https://github.com/kasra-haghpanah/spring-cloud-webflux-with-eureka-discovery/assets/53397941/baddb413-a206-4421-b2cf-71974052832f)
+![04](https://github.com/kasra-haghpanah/spring-cloud-webflux-with-eureka-discovery/assets/53397941/61fb7a72-2cd4-44e7-920f-cfcffb910068)
 
-![01](https://github.com/kasra-haghpanah/spring-cloud-webflux-with-eureka-discovery/assets/53397941/60ce41e4-1960-480a-9587-94a5fb81449e)
+![05](https://github.com/kasra-haghpanah/spring-cloud-webflux-with-eureka-discovery/assets/53397941/7bb012a2-6736-42b8-8306-07d7a91eff52)
+
 
 
 
