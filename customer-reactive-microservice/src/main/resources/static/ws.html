@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="UTF-8">
+    <title>websocket</title>
+</head>
+
+<style>
+    .div-container {
+        display: inline-block;
+        width: 45%; /* Adjust width as needed */
+        margin-right: 5%; /* Add spacing between divs */
+    }
+
+    .flex-container {
+        display: flex;
+    }
+
+    .font-member {
+        font-size: large;
+        font-weight: bold;
+    }
+
+
+</style>
+
+<script type="text/javascript">
+
+
+    window.addEventListener("load", () => {
+
+
+        if (window.messageHandler === undefined) {
+
+            window.messageHandler = {
+                userClickEvent: function (e) {
+
+                    var divMembers = document.getElementById("members");
+                    var username = e.target.getAttribute("id");
+                    if (window.members[username] !== undefined) {
+                        var array = [];
+                        for (var key in members[username]) {
+                            var keys = key.split("-");
+                            var property = {
+                                host: keys[0],
+                                port: parseInt(keys[1]),
+                                id: keys[2]
+                            };
+                            array.push(property);
+
+                        }
+
+                        document.getElementById("code").innerText = JSON.stringify(array, null, 1);
+
+                        var divs = divMembers.querySelectorAll('div');
+                        for (var i = 0; i < divs.length; i++) {
+                            if (divs[i]['id'] == username) {
+                                divs[i].style.backgroundColor = "#e0e0ec";
+                            } else {
+                                divs[i].style.backgroundColor = "white";
+                            }
+                        }
+
+
+                    }
+
+                },
+                getData: function (message) {
+
+                    var data = message.data;
+                    if (data !== null && typeof data === 'string' && !Array.isArray(data)) {
+                        data = JSON.parse(message.data);
+                    }
+                    return data;
+
+                },
+                openSession: function (data) {
+
+                    if (data.operationType == "OPEN_SESSION") {
+
+                        if (window.members === undefined) {
+                            window.members = {};
+                        }
+
+                        var divMembers = document.getElementById("members");
+                        var username = data.content.username;
+                        window.members[username] = {};
+
+                        if (data.content.websocketUsers != null && data.content.websocketUsers.length > 0) {
+                            var websocketUsers = data.content.websocketUsers;
+                            for (var i = 0; i < websocketUsers.length; i++) {
+                                window.members[username][`${websocketUsers[i]['host']}-${websocketUsers[i]['port']}-${websocketUsers[i]['id']}`] = "";
+                            }
+                        }
+
+                        var divMember = document.getElementById(username);
+                        if (divMember == null) {
+                            divMember = document.createElement("div");
+                            divMember.setAttribute("id", username);
+                            divMember.innerText = username;
+                            divMember.style.height = "30px";
+                            divMember.style.cursor = "pointer";
+                            divMembers.append(divMember);
+
+                            divMember.addEventListener("click", messageHandler.userClickEvent);
+
+
+                        }
+
+                        var divs = divMembers.querySelectorAll('div');
+                        for (var i = 0; i < divs.length; i++) {
+                            if (divs[i].style.backgroundColor != "white") {
+                                divs[i].click();
+                                break;
+                            }
+                            if (i == divs.length - 1) {
+                                divs[0].click();
+                            }
+                        }
+
+                    }
+
+                },
+                closeSession: function (data) {
+
+                    if (data.operationType == "CLOSE_SESSION") {
+
+                        var username = data.content.username;
+
+                        if (window.members === undefined) {
+                            window.members = {};
+                        }
+
+                        window.members[username] = {};
+
+                        if (data.content.websocketUsers != null && data.content.websocketUsers.length > 0) {
+                            var websocketUsers = data.content.websocketUsers;
+                            for (var i = 0; i < websocketUsers.length; i++) {
+                                window.members[username][`${websocketUsers[i]['host']}-${websocketUsers[i]['port']}-${websocketUsers[i]['id']}`] = "";
+                            }
+                        } else {
+                            if (window.members[username] !== undefined) {
+                                delete window.members[username];
+                            }
+
+                            var div = document.getElementById(username);
+                            if (div != null) {
+                                div.removeEventListener("click", messageHandler.userClickEvent);
+                                div.parentElement.removeChild(div);
+                            }
+                        }
+
+                        var divMembers = document.getElementById("members");
+                        var divs = divMembers.querySelectorAll('div');
+                        for (var i = 0; i < divs.length; i++) {
+                            if (divs[i].style.backgroundColor != "white") {
+                                divs[i].click();
+                                break;
+                            }
+                            if (i == divs.length - 1) {
+                                divs[0].click();
+                            }
+                        }
+
+
+                    }
+
+                },
+                onMessage: function (data) {
+
+                    var textarea = document.getElementById("textarea");
+
+                    if (data.operationType == "CHAT") {
+
+                        var div = document.createElement("div");
+                        var sender = "you";
+                        if (data.sender != data.receiver) {
+                            sender = data.sender;
+                        }
+                        div.innerText = `${sender}: ${data.content}`;
+                        textarea.appendChild(div);
+                        textarea.scrollTop = textarea.scrollHeight;
+
+                    }
+
+
+                },
+                onOpenWSF: function () {
+                    if (messageHandler.firsCreateConnection === undefined) {
+                        messageHandler.firsCreateConnection = true;
+                        messageHandler.websocket.send("hi everyone");
+                    } else {
+                        messageHandler.firsCreateConnection = false;
+                        messageHandler.websocket.send("hi everyone again after a disconnection!");
+                    }
+                },
+                onCloseWSF: function (close) {
+                    messageHandler.dropWebsocket();
+                    setTimeout(function () {
+                        console.log("Delayed message after 5 seconds");
+                        messageHandler.createWebsocket(url);
+                    }, 5000);
+                },
+                onErrorWSF: function (error) {
+
+                },
+                onMessageWSF: function (message) {
+                    var data = messageHandler.getData(message);
+                    messageHandler.openSession(data);
+                    messageHandler.onMessage(data);
+                    messageHandler.closeSession(data);
+                },
+                createWebsocket: function (url) {
+                    messageHandler.websocket = new WebSocket(url);
+                    messageHandler.websocket.addEventListener("message", messageHandler.onMessageWSF);
+                    messageHandler.websocket.addEventListener("open", messageHandler.onOpenWSF);
+                    messageHandler.websocket.addEventListener("error", messageHandler.onErrorWSF);
+                    messageHandler.websocket.addEventListener("close", messageHandler.onCloseWSF);
+                    return messageHandler.websocket;
+                },
+                dropWebsocket: function () {
+
+                    window.members = {};
+                    var divMembers = document.getElementById("members");
+                    var divs = divMembers.querySelectorAll('div');
+                    for (var i = 0; i < divs.length; i++) {
+                        divs[i].removeEventListener("click", messageHandler.userClickEvent);
+                        divMembers.removeChild(divs[i]);
+                    }
+                    document.getElementById("code").innerText = "";
+
+                    messageHandler.websocket.removeEventListener("message", messageHandler.onMessageWSF);
+                    messageHandler.websocket.removeEventListener("open", messageHandler.onOpenWSF);
+                    messageHandler.websocket.removeEventListener("error", messageHandler.onErrorWSF);
+                    messageHandler.websocket.removeEventListener("close", messageHandler.onCloseWSF);
+                    messageHandler.websocket.close();
+                },
+                prompt: function () {
+                    var username = prompt("Enter your email");
+                    if (username == null || username.trim() == "") {
+                        messageHandler.prompt();
+                    }
+
+                    console.log(username);
+
+                    var pattern = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+                    var match = username.match(pattern);
+
+                    if (match == null || match.length == 0) {
+                        messageHandler.prompt();
+                    }
+
+                    return username;
+                }
+            }
+
+        }
+
+        var username = messageHandler.prompt();
+        document.getElementById("user").innerText = "Welcome: " + username;
+
+
+        var url = `ws://${location.origin.substring(location.origin.indexOf("//") + 2)}/customer/websocket?username=${username}`;
+
+        //url = 'ws://localhost:9999/websocket';
+
+        messageHandler.createWebsocket(url);
+
+        var sendButton = document.getElementById("send");
+        var textInput = document.getElementById("text");
+
+        sendButton.addEventListener("click", () => {
+            var text = textInput.value.trim();
+            if (text != "" && messageHandler.websocket !== undefined && messageHandler.websocket.readyState === WebSocket.OPEN) {
+                messageHandler.websocket.send(text);
+                textInput.value = "";
+            }
+        });
+
+        textInput.addEventListener("keyup", (e) => {
+            if (e.key === "Enter") {
+                var text = textInput.value.trim();
+                if (text != "" && messageHandler.websocket !== undefined && messageHandler.websocket.readyState === WebSocket.OPEN) {
+                    messageHandler.websocket.send(text);
+                    textInput.value = "";
+                }
+            }
+        });
+
+    });
+</script>
+
+<body>
+
+
+<div>
+    <div id="user" style="color: red;font-weight: bold;"></div>
+    <input type="text" id="text"/>
+    <input type="button" id="send" value="send">
+    <br/>
+    <div class="flex-container">
+        <div class="div-container" id="textarea" style="width: 700px;height: 700px;overflow: scroll;"></div>
+        <div class="div-container font-member" id="members"></div>
+        <code class="div-container font-member" id="code"></code>
+    </div>
+</div>
+
+</body>
+</html>

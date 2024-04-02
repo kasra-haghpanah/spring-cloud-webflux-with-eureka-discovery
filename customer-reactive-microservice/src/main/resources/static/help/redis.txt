@@ -1,0 +1,21 @@
+----------------------------------------------------------------------------------------
+How to install Redis on Windows
+https://collabnix.com/install-redis-on-windows-in-2-minutes/
+
+sudo apt-add-repository ppa:redislabs/redis
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install redis-server
+
+sudo service redis-server restart
+sudo service redis-server stop
+----------------------------------------------------------------------------------------
+How to install Docker on Ubuntu
+https://virgool.io/@mkay1375/installing-docker-on-ubuntu-pympj2mir9uy
+----------------------------------------------------------------------------------------
+How to install DockerInsight on Ubuntu
+https://virgool.io/@mkay1375/install-redis-and-redisinsight-using-docker-uu4xlb44i5rc
+----------------------------------------------------------------------------------------
+How to set proxy
+https://shecan.ir/
+----------------------------------------------------------------------------------------
