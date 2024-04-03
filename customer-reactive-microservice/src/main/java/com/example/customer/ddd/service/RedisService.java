@@ -11,9 +11,6 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.nio.ByteBuffer;
-import java.util.List;
-
 @Service
 public class RedisService {
 
@@ -157,15 +154,14 @@ public class RedisService {
         return getAllHashKeysByKeys(Flux.fromIterable(keys));
     }
 
-    public Mono<String> searchKeysByRegex(String pattern) {
+    public Flux<String> searchKeysByRegex(String pattern) {
         ReactiveKeyCommands keyCommands = reactiveStringRedisTemplate.getConnectionFactory().getReactiveConnection().keyCommands();
         return keyCommands.keys(Converter.convertStringToByteBuffer(pattern))
-                .map(byteBuffers -> {
-                    StringBuilder stringBuilder = new StringBuilder();
-                    for (ByteBuffer byteBuffer : byteBuffers) {
-                        stringBuilder.append(Converter.convertByteBufferToString(byteBuffer));
-                    }
-                    return stringBuilder.toString();
+                .flatMapMany(byteBuffers -> {
+                    return Flux.fromIterable(byteBuffers);
+                })
+                .map(byteBuffer -> {
+                    return Converter.convertByteBufferToString(byteBuffer);
                 });
     }
 
