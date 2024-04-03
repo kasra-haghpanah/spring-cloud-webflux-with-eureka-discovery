@@ -1,13 +1,18 @@
 package com.example.customer.ddd.service;
 
 import com.example.customer.ddd.model.redis.User;
+import com.example.customer.utility.Converter;
 import com.example.customer.utility.MakeContent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.reactivestreams.Publisher;
+import org.springframework.data.redis.connection.ReactiveKeyCommands;
 import org.springframework.data.redis.core.ReactiveStringRedisTemplate;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.nio.ByteBuffer;
+import java.util.List;
 
 @Service
 public class RedisService {
@@ -150,6 +155,23 @@ public class RedisService {
             return Flux.empty();
         }
         return getAllHashKeysByKeys(Flux.fromIterable(keys));
+    }
+
+    public Mono<String> searchKeysByRegex(String pattern) {
+        ReactiveKeyCommands keyCommands = reactiveStringRedisTemplate.getConnectionFactory().getReactiveConnection().keyCommands();
+        return keyCommands.keys(Converter.convertStringToByteBuffer(pattern))
+                .map(byteBuffers -> {
+                    StringBuilder stringBuilder = new StringBuilder();
+                    for (ByteBuffer byteBuffer : byteBuffers) {
+                        stringBuilder.append(Converter.convertByteBufferToString(byteBuffer));
+                    }
+                    return stringBuilder.toString();
+                });
+    }
+
+    public Flux<String> flushAll() {
+        return reactiveStringRedisTemplate.execute(connection -> connection.serverCommands().flushAll())
+                .map(result -> "Redis database flushed successfully.");
     }
 
 
